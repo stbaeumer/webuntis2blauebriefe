@@ -19,7 +19,7 @@ namespace webuntis2BlaueBriefe
 
             try
             {
-                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2023 | Version 20230320");
+                Console.WriteLine(" Webuntis2BlaueBriefe | Published under the terms of GPLv3 | Stefan Bäumer 2023 | Version 20230323");
                 Console.WriteLine("====================================================================================================");
                 Console.WriteLine("");
 
