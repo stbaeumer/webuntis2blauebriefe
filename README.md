@@ -8,7 +8,7 @@ Technische Voraussetzung sind:
 3. Installation von Word 
 
 ## Organisatorische Voraussetzungen sind:
-1. eine Prüfungsart namens  "Blauer Brief" mit dem Langnamen //Mahnung gem. §50 (4) SchulG (Blauer Brief)// ist in Webuntis angelegt
+1. eine Prüfungsart namens  "Blauer Brief" mit dem Langnamen *Mahnung gem. §50 (4) SchulG (Blauer Brief)* ist in Webuntis angelegt
 2. die Lehrerinnen und Lehrer haben die Blauen Briefe in der Prüfungseintrag "Blauer Brief" eingetragen 
 3. die Datei ```MarksPerLesson.csv``` wurde aus Webuntis exportiert und im Download-Ordner abgelegt.
 
