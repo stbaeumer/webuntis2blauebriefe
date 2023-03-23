@@ -1,14 +1,14 @@
 # webuntis2BlaueBriefe
 
-## Webuntis2BlaueBriefe generiert versandfertige Blaue Briefe als einzelne Worddokumente.
+## Webuntis2BlaueBriefe generiert versandfertige Blaue Briefe als einzelne Word- und PDF-Dokumente.
 
 Technische Voraussetzung sind: 
 1. der Einsatz von Atlantis als Schulverwaltungsprogramm
-2. der Einsatz von Webuntis und Untis auf Basis einer MDB-Datenbank
+2. der Einsatz von Webuntis und Untis auf Basis einer SQL-Datenbank
 3. Installation von Word 
 
 ## Organisatorische Voraussetzungen sind:
-1. eine Prüfungsart namens  "Blauer Brief" ist in Webuntis angelegt
+1. eine Prüfungsart namens  "Blauer Brief" mit dem Langnamen //Mahnung gem. §50 (4) SchulG (Blauer Brief)// ist in Webuntis angelegt
 2. die Lehrerinnen und Lehrer haben die Blauen Briefe in der Prüfungseintrag "Blauer Brief" eingetragen 
 3. die Datei ```MarksPerLesson.csv``` wurde aus Webuntis exportiert und im Download-Ordner abgelegt.
 
