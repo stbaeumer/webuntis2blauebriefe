@@ -1,4 +1,8 @@
 ﻿// Published under the terms of GPLv3 Stefan Bäumer 2023
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
+using PdfSharp.Pdf.Security;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -40,7 +44,7 @@ namespace webuntis2BlaueBriefe
                 
                 Schuelers schuelerMitDefiziten = new Schuelers(defizitäreWebuntisLeistungen, atlantisLeistungen, klasses, lehrers);
 
-                
+                Global.WriteLine(Folder, "Protokoll");
 
                 foreach (var sd in schuelerMitDefiziten)
                 {
@@ -55,7 +59,7 @@ namespace webuntis2BlaueBriefe
                     var verschlechterungvon5auf6 = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 where s.NoteJetzt == 6 select s.NoteHalbjahr).Any() ? true : false;
 
                     Console.WriteLine(sd.Klasse.PadRight(6) + sd.Nachname + "," + sd.Vorname + " ...");
-                    Global.WriteLine(Folder,sd.Nachname + "," + sd.Vorname + ": " + (sd.Volljaehrig ? "Volljährig" : " Minderjährig") + ", " + sd.Klasse);
+                    Global.WriteLine(Folder,sd.Nachname + "," + sd.Vorname + ": " + sd.Klasse + ", " + (sd.Volljaehrig ? "volljährig" : " minderjährig"));
 
                     if (!nochWeitereDefiziteHinzugekommen && !verschlechterungvon5auf6)
                     {
@@ -66,7 +70,7 @@ namespace webuntis2BlaueBriefe
                     
                     if (imHalbjahrKeinDefizit && nochWeitereDefiziteHinzugekommen)
                     {
-                        Global.Write(Folder,"imHalbjahrKeinDefizit,");
+                        Global.Write(Folder,"im Halbjahr kein Defizit, ");
                         
                         //jetzt eine 5: Mitteilung über Leistungsstand
 
@@ -91,7 +95,7 @@ namespace webuntis2BlaueBriefe
 
                     if (bereitsImHalbjahrEine5 && nochWeitereDefiziteHinzugekommen)
                     {
-                        Global.Write(Folder,"bereits im Halbjahr eine 5; jetzt eine o. mehrere zusätzliche 5en o. 6en;");
+                        Global.Write(Folder,"bereits im Halbjahr eine 5; jetzt eine oder mehrere zusätzliche 5en oder 6en;");
                         sd.RenderMitteilung("G", Folder);
                     }
 
@@ -107,7 +111,7 @@ namespace webuntis2BlaueBriefe
 
                     if (bereitsImHalbjahrGefährdet && nochWeitereDefiziteHinzugekommen)
                     {
-                        Global.Write(Folder, sd.Nachname + "," + sd.Vorname + ": " + "bereits im Halbjahr gefährdet; jetzt eine o. mehrere zusätzliche 5en o. 6en;");
+                        Global.Write(Folder, sd.Nachname + "," + sd.Vorname + ": " + "bereits im Halbjahr gefährdet; jetzt eine oder mehrere zusätzliche 5en oder 6en;");
                         sd.RenderMitteilung("G", Folder);
                     }
 
@@ -119,6 +123,9 @@ namespace webuntis2BlaueBriefe
                     }
                     Global.WriteLine(Folder, "");
                 }
+
+                Verschlüsseln(Folder);
+                ProtokollVerschlüsseln(Folder);
 
                 Console.WriteLine("");
                 Console.WriteLine("Verarbeitung beendet. ENTER");
@@ -148,6 +155,69 @@ namespace webuntis2BlaueBriefe
                 Console.WriteLine(ex);
                 Console.ReadKey();
                 Environment.Exit(0);
+            }
+        }
+
+        private static void ProtokollVerschlüsseln(string folder)
+        {
+            try
+            {
+                string line = null;
+                System.IO.TextReader readFile = new StreamReader(folder + "\\Protokoll.txt");
+                int yPoint = 0;
+
+                PdfDocument pdf = new PdfDocument();
+                pdf.Info.Title = "TXT to PDF";
+                PdfPage pdfPage = pdf.AddPage();
+                XGraphics graph = XGraphics.FromPdfPage(pdfPage);
+                XFont font = new XFont("Courier", 10, XFontStyle.Regular);
+
+                while (true)
+                {
+                    line = readFile.ReadLine();
+                    if (line == null)
+                    {
+                        break; // TODO: might not be correct. Was : Exit While
+                    }
+                    else
+                    {
+                        graph.DrawString(line, font, XBrushes.Black, new XRect(12, yPoint, pdfPage.Width.Point, pdfPage.Height.Point), XStringFormats.TopLeft);
+                        yPoint = yPoint + 12;
+                    }
+                }
+
+                string pdfFilename = folder + "\\Protokoll.pdf";
+                pdf.Save(pdfFilename);
+                readFile.Close();
+                readFile = null;
+                Process.Start(pdfFilename);
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        private static void Verschlüsseln(string folder)
+        {
+            string[] fileGroup = Directory.GetFiles(folder + "\\", "*.pdf");
+
+            foreach (string fileName in (from f in fileGroup
+                                         where !f.Contains("-Kennwort")
+                                         select f).ToList())
+            {
+                PdfDocument document = PdfReader.Open(fileName);
+                PdfSecuritySettings securitySettings = document.SecuritySettings;
+                securitySettings.UserPassword = "!7765Neun";
+                securitySettings.OwnerPassword = "!7765Neun";
+                securitySettings.PermitAccessibilityExtractContent = false;
+                securitySettings.PermitAnnotations = false;
+                securitySettings.PermitAssembleDocument = false;
+                securitySettings.PermitExtractContent = false;
+                securitySettings.PermitFormsFill = true;
+                securitySettings.PermitFullQualityPrint = false;
+                securitySettings.PermitModifyDocument = true;
+                securitySettings.PermitPrint = false;
+                document.Save(fileName.Replace(".pdf", "-Kennwort.pdf"));
             }
         }
 

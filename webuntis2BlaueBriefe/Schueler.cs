@@ -65,7 +65,7 @@ namespace webuntis2BlaueBriefe
 
                 var origFileName = "Blaue Briefe.docx";
 
-                var fileName = folder + "\\" + (Volljaehrig ? "V-" : "M-") + DateTime.Now.ToString("yyyyMMdd") + "-" + Klasse + "-" + Nachname + "-" + Vorname + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung.docx" : "-Mitteilung.docx");
+                var fileName = folder + "\\" + (Volljaehrig ? "V-" : "M-") + DateTime.Now.ToString("yyyyMMdd") + "-" + Klasse + "-" + Nachname.Substring(0,2) + "-" + Vorname.Substring(0,2) + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung.docx" : "-Mitteilung.docx");
 
                 Dateien.Add(fileName);
 
