@@ -78,7 +78,7 @@ namespace webuntis2BlaueBriefe
 
                         foreach (var item in (from d in sd.DefizitäreLeistungen select d))
                         {
-                            dw += item.Fach.PadRight(5) + item.NoteHalbjahr.ToString() + "=>" + item.NoteJetzt + @"\\ ";
+                            dw += item.Fach + " " + item.NoteHalbjahr.ToString() + "=>" + item.NoteJetzt + @"\\ ";
                         }
 
                         if (!nochWeitereDefiziteHinzugekommen && !verschlechterungvon5auf6)
