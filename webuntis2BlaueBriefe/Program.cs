@@ -1,4 +1,5 @@
 ﻿// Published under the terms of GPLv3 Stefan Bäumer 2023
+using Ionic.Zip;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
@@ -19,6 +20,7 @@ namespace webuntis2BlaueBriefe
         static void Main(string[] args)
         {
             System.IO.Directory.CreateDirectory(Folder);
+
             string steuerdatei = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), DateTime.Now.ToString("yyMMdd-HHmmss") + "_webuntisnoten2atlantis_" + System.Security.Principal.WindowsIdentity.GetCurrent().Name.ToUpper().Split('\\')[1] + ".csv");
 
             try
@@ -32,10 +34,11 @@ namespace webuntis2BlaueBriefe
                 Periodes periodes = new Periodes();
                 Leistungen alleDefizitäreWebuntisLeistungen = new Leistungen(sourceMarksPerLesson);
 
-                var xxx = alleDefizitäreWebuntisLeistungen.GetInteressierendeKlassen();
+                var klassenliste = alleDefizitäreWebuntisLeistungen.GetInteressierendeKlassen();
 
                 var defizitäreWebuntisLeistungen = new Leistungen();
-                defizitäreWebuntisLeistungen.AddRange((from t in alleDefizitäreWebuntisLeistungen where xxx.Contains(t.Klasse) select t).ToList());
+
+                defizitäreWebuntisLeistungen.AddRange((from t in alleDefizitäreWebuntisLeistungen where klassenliste.Contains(t.Klasse) select t).ToList());
 
                 Lehrers lehrers = new Lehrers(periodes);
                 Klasses klasses = new Klasses(lehrers, periodes, defizitäreWebuntisLeistungen);
@@ -43,89 +46,99 @@ namespace webuntis2BlaueBriefe
                 Leistungen atlantisLeistungen = new Leistungen(Global.ConnectionStringAtlantis, defizitäreWebuntisLeistungen);
                 
                 Schuelers schuelerMitDefiziten = new Schuelers(defizitäreWebuntisLeistungen, atlantisLeistungen, klasses, lehrers);
-
-                Global.WriteLine(Folder, "Protokoll");
-
-                foreach (var sd in schuelerMitDefiziten)
+                
+                foreach (var klasse in klassenliste)
                 {
-                    var hzAnzahl5en = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 select s).Count();
-                    var hzAnzahl6en = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 6 select s).Count();
-                    var jetztAnzahl5en = (from s in sd.DefizitäreLeistungen where s.NoteJetzt == 5 select s).Count();
-                    var jetztAnzahl6en = (from s in sd.DefizitäreLeistungen where s.NoteJetzt == 6 select s).Count();
-                    var nochWeitereDefiziteHinzugekommen = (from s in sd.DefizitäreLeistungen where s.NeueDefizitLeistung select s).Any();
-                    var bereitsImHalbjahrGefährdet = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr >= 5 select s.NoteHalbjahr).Sum() >= 6 ? true : false;
-                    var bereitsImHalbjahrEine5 = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 select s).Count() == 1 ? true : false;
-                    var imHalbjahrKeinDefizit = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr >=5 select s.NoteHalbjahr).Any() ? false : true;
-                    var verschlechterungvon5auf6 = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 where s.NoteJetzt == 6 select s.NoteHalbjahr).Any() ? true : false;
+                    string kl = klasse;
 
-                    Console.WriteLine(sd.Klasse.PadRight(6) + sd.Nachname + "," + sd.Vorname + " ...");
-                    Global.WriteLine(Folder,sd.Nachname + "," + sd.Vorname + ": " + sd.Klasse + ", " + (sd.Volljaehrig ? "volljährig" : " minderjährig"));
+                    System.IO.Directory.CreateDirectory(Folder + @"\\" + klasse);
 
-                    if (!nochWeitereDefiziteHinzugekommen && !verschlechterungvon5auf6)
+                    Global.WriteLine(Folder + "\\" + klasse, "===== Briefe " + DateTime.Now.Year + " (Stand: " + DateTime.Now.ToShortDateString() + ", " + DateTime.Now.ToShortTimeString() + ") =====");
+                    Global.WriteLine(Folder + "\\" + klasse, "  ");
+                    Global.WriteLine(Folder + "\\" + klasse, "==== " + klasse + " ====");
+                    Global.WriteLine(Folder + "\\" + klasse, "  ");
+
+                    Global.WriteLine(Folder + "\\" + klasse, @"^  Name  ^  Voll-\\ jährig  ^  Fächer & Noten \\ Halbjahr=>Jetzt  ^  Beschreibung  ^  Brief  ^");
+
+                    foreach (var sd in (from s in schuelerMitDefiziten where s.Volljaehrig == false where s.Klasse == klasse select s).ToList())
                     {
-                        Global.WriteLine(Folder, sd.Nachname + "," + sd.Vorname + ": keine weiteren Defizite seit dem Halbjahr, keine Mitteilung.");
-                    }
+                        var hzAnzahl5en = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 select s).Count();
+                        var hzAnzahl6en = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 6 select s).Count();
+                        var jetztAnzahl5en = (from s in sd.DefizitäreLeistungen where s.NoteJetzt == 5 select s).Count();
+                        var jetztAnzahl6en = (from s in sd.DefizitäreLeistungen where s.NoteJetzt == 6 select s).Count();
+                        var nochWeitereDefiziteHinzugekommen = (from s in sd.DefizitäreLeistungen where s.NeueDefizitLeistung select s).Any();
+                        var bereitsImHalbjahrGefährdet = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr >= 5 select s.NoteHalbjahr).Sum() >= 6 ? true : false;
+                        var bereitsImHalbjahrEine5 = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 select s).Count() == 1 ? true : false;
+                        var imHalbjahrKeinDefizit = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr >= 5 select s.NoteHalbjahr).Any() ? false : true;
+                        var verschlechterungvon5auf6 = (from s in sd.DefizitäreLeistungen where s.NoteHalbjahr == 5 where s.NoteJetzt == 6 select s.NoteHalbjahr).Any() ? true : false;
 
-                    // HZ: kein Defizit; 
-                    
-                    if (imHalbjahrKeinDefizit && nochWeitereDefiziteHinzugekommen)
-                    {
-                        Global.Write(Folder,"im Halbjahr kein Defizit, ");
+                        Console.WriteLine(sd.Klasse.PadRight(6) + sd.Nachname + "," + sd.Vorname + " ...");
+
+                        string dw = "|  "  + sd.Nachname.Substring(0,2) + ", " + sd.Vorname.Substring(0,2) + "  |" + (sd.Volljaehrig ? "ja" : "nein") + "|";
+
+                        foreach (var item in (from d in sd.DefizitäreLeistungen select d))
+                        {
+                            dw += item.Fach.PadRight(5) + item.NoteHalbjahr.ToString() + "=>" + item.NoteJetzt + @"\\ ";
+                        }
+
+                        if (!nochWeitereDefiziteHinzugekommen && !verschlechterungvon5auf6)
+                        {
+                            dw += "|Keine weiteren Defizite seit dem Halbjahr.  |  keine Mitteilung  |";
+                        }
+
+                        // HZ: kein Defizit; 
+
+                        if (imHalbjahrKeinDefizit && nochWeitereDefiziteHinzugekommen)
+                        {
+                            dw += "|Im Halbjahr kein Defizit. ";
+
+                            //jetzt eine 5: Mitteilung über Leistungsstand
+
+                            if ((from s in sd.DefizitäreLeistungen where s.NeueDefizitLeistung select s.NoteJetzt).Sum() == 5)
+                            {
+                                dw += "Jetzt eine 5.  |  Mitteilung über Leistungsstand  |";
+                                sd.RenderMitteilung("M", Folder + "\\" + klasse);
+                            }
+
+                            // HZ kein Defizit; jetzt zwei oder mehr 5: Gefährdung
+                            // HZ kein Defizit; jetzt eine 6 oder mehr: Gefährdung
+
+                            if ((from s in sd.DefizitäreLeistungen where s.NeueDefizitLeistung select s.NoteJetzt).Sum() >= 6)
+                            {
+                                dw += "Jetzt zwei oder mehr 5 oder eine 6.  |  Gefährdung  |";
+                                sd.RenderMitteilung("G", Folder + "\\" + klasse);
+                            }
+                        }
+
+                        // HZ eine 5; jetzt eine oder mehrere zusätzliche 5en: Gefährdung
+                        // HZ eine 5; jetzt eine oder mehrere zusätzliche 6en: Gefährdung
+
+                        if (bereitsImHalbjahrEine5 && nochWeitereDefiziteHinzugekommen)
+                        {
+                            dw += @"|Bereits im Halbjahr eine 5.\\ Jetzt eine oder mehrere zusätzliche 5en oder 6en.  |  Gefährung  |";
+                            sd.RenderMitteilung("G", Folder + "\\" + klasse);
+                        }
+
+                        // HZ eine 5; jetzt Verschlechterung auf 6: Gefährdung
+
+                        if (bereitsImHalbjahrEine5 && verschlechterungvon5auf6 && !nochWeitereDefiziteHinzugekommen)
+                        {
+                            dw += @"|Im Hj genau eine 5, also bisher nicht gefährdet. Jetzt 6.  |  Mitteilung über\\ Leistungsstand  |";
+                            sd.RenderMitteilung("V", Folder + "\\" + klasse);
+                        }
+
+                        // HZ: Zwei oder mehr 5en oder mindestens eine 6; jetzt eine oder zusätzliche 5en oder 6er: Gefährdung
+
+                        if (bereitsImHalbjahrGefährdet && nochWeitereDefiziteHinzugekommen)
+                        {
+                            dw += @"|Bereits im Halbjahr gefährdet.\\ Jetzt eine oder mehrere zusätzliche 5en oder 6en.  |  Gefährdung  |";
+                            sd.RenderMitteilung("G", Folder + "\\" + klasse);
+                        }
                         
-                        //jetzt eine 5: Mitteilung über Leistungsstand
-
-                        if ((from s in sd.DefizitäreLeistungen where s.NeueDefizitLeistung select s.NoteJetzt).Sum() == 5)
-                        {
-                            Global.Write(Folder,"jetzt eine 5,");                                                        
-                            sd.RenderMitteilung("M", Folder);
-                        }
-
-                        // HZ kein Defizit; jetzt zwei oder mehr 5: Gefährdung
-                        // HZ kein Defizit; jetzt eine 6 oder mehr: Gefährdung
-
-                        if ((from s in sd.DefizitäreLeistungen where s.NeueDefizitLeistung select s.NoteJetzt).Sum() >= 6)
-                        {
-                            Global.Write(Folder,"jetzt zwei oder mehr 5 oder eine 6,");
-                            sd.RenderMitteilung("G", Folder);
-                        }
+                        Global.WriteLine(Folder + "\\" + klasse, dw);                        
                     }
-
-                    // HZ eine 5; jetzt eine oder mehrere zusätzliche 5en: Gefährdung
-                    // HZ eine 5; jetzt eine oder mehrere zusätzliche 6en: Gefährdung
-
-                    if (bereitsImHalbjahrEine5 && nochWeitereDefiziteHinzugekommen)
-                    {
-                        Global.Write(Folder,"bereits im Halbjahr eine 5; jetzt eine oder mehrere zusätzliche 5en oder 6en;");
-                        sd.RenderMitteilung("G", Folder);
-                    }
-
-                    // HZ eine 5; jetzt Verschlechterung auf 6: Gefährdung
-
-                    if (bereitsImHalbjahrEine5 && verschlechterungvon5auf6 && !nochWeitereDefiziteHinzugekommen)
-                    {
-                        Global.Write(Folder,"im Hj genau eine 5, also bisher nicht gefährdet; jetzt 6;");
-                        sd.RenderMitteilung("V", Folder);
-                    }
-
-                    // HZ: Zwei oder mehr 5en oder mindestens eine 6; jetzt eine oder zusätzliche 5en oder 6er: Gefährdung
-
-                    if (bereitsImHalbjahrGefährdet && nochWeitereDefiziteHinzugekommen)
-                    {
-                        Global.Write(Folder, sd.Nachname + "," + sd.Vorname + ": " + "bereits im Halbjahr gefährdet; jetzt eine oder mehrere zusätzliche 5en oder 6en;");
-                        sd.RenderMitteilung("G", Folder);
-                    }
-
-                    // Zeilen für alle gefährdeten Fächer andrucken
-
-                    foreach (var item in (from d in sd.DefizitäreLeistungen select d))
-                    {
-                        Global.WriteLine(Folder, sd.Nachname + "," + sd.Vorname + ": " + item.Fach.PadRight(5) + item.NoteHalbjahr.ToString() + " => " + item.NoteJetzt);
-                    }
-                    Global.WriteLine(Folder, "");
+                    Verschlüsseln(Folder + "\\" + klasse);
                 }
-
-                Verschlüsseln(Folder);
-                ProtokollVerschlüsseln(Folder);
 
                 Console.WriteLine("");
                 Console.WriteLine("Verarbeitung beendet. ENTER");
@@ -158,51 +171,14 @@ namespace webuntis2BlaueBriefe
             }
         }
 
-        private static void ProtokollVerschlüsseln(string folder)
-        {
-            try
-            {
-                string line = null;
-                System.IO.TextReader readFile = new StreamReader(folder + "\\Protokoll.txt");
-                int yPoint = 0;
-
-                PdfDocument pdf = new PdfDocument();
-                pdf.Info.Title = "TXT to PDF";
-                PdfPage pdfPage = pdf.AddPage();
-                XGraphics graph = XGraphics.FromPdfPage(pdfPage);
-                XFont font = new XFont("Courier", 10, XFontStyle.Regular);
-
-                while (true)
-                {
-                    line = readFile.ReadLine();
-                    if (line == null)
-                    {
-                        break; // TODO: might not be correct. Was : Exit While
-                    }
-                    else
-                    {
-                        graph.DrawString(line, font, XBrushes.Black, new XRect(12, yPoint, pdfPage.Width.Point, pdfPage.Height.Point), XStringFormats.TopLeft);
-                        yPoint = yPoint + 12;
-                    }
-                }
-
-                string pdfFilename = folder + "\\Protokoll.pdf";
-                pdf.Save(pdfFilename);
-                readFile.Close();
-                readFile = null;
-                Process.Start(pdfFilename);
-            }
-            catch (Exception ex)
-            {
-            }
-        }
+ 
 
         private static void Verschlüsseln(string folder)
         {
             string[] fileGroup = Directory.GetFiles(folder + "\\", "*.pdf");
 
             foreach (string fileName in (from f in fileGroup
-                                         where !f.Contains("-Kennwort")
+                                         where !f.Contains("-Verschlüsselt")
                                          select f).ToList())
             {
                 PdfDocument document = PdfReader.Open(fileName);
@@ -217,7 +193,7 @@ namespace webuntis2BlaueBriefe
                 securitySettings.PermitFullQualityPrint = false;
                 securitySettings.PermitModifyDocument = true;
                 securitySettings.PermitPrint = false;
-                document.Save(fileName.Replace(".pdf", "-Kennwort.pdf"));
+                document.Save(fileName.Replace(".pdf", "-Verschlüsselt.pdf"));
             }
         }
 

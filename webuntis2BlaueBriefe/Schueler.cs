@@ -46,8 +46,7 @@ namespace webuntis2BlaueBriefe
         public List<string> Dateien { get; set; }
 
         internal void RenderMitteilung(string art, string folder)
-        {           
-
+        {      
             // Für jede unterschiedliche Adresse
 
             var x = (from s in this.Sorgeberechtigte select s.Strasse).Distinct().Count();
@@ -59,13 +58,18 @@ namespace webuntis2BlaueBriefe
                 sss = new List<string>() { Strasse };
             }
 
+            if (x==0)
+            {
+                sss.Add(Strasse);
+            }
+
             foreach (var strasse in sss)
             {
                 var sorgeberechtigter = (from s in this.Sorgeberechtigte where s.Strasse == strasse select s).FirstOrDefault();
 
                 var origFileName = "Blaue Briefe.docx";
 
-                var fileName = folder + "\\" + (Volljaehrig ? "V-" : "M-") + DateTime.Now.ToString("yyyyMMdd") + "-" + Klasse + "-" + Nachname.Substring(0,2) + "-" + Vorname.Substring(0,2) + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung.docx" : "-Mitteilung.docx");
+                var fileName = folder + "\\" + Klasse + "-" + Nachname.Substring(0,2) + "-" + Vorname.Substring(0,2) + (x > 1 ? strasse : "") + (art == "G" ? "-Gefährdung.docx" : "-Mitteilung.docx");
 
                 Dateien.Add(fileName);
 
@@ -121,7 +125,7 @@ namespace webuntis2BlaueBriefe
                 FindAndReplace(wordApp, doc, "<hinweis>", GetHinweis());
                 FindAndReplace(wordApp, doc, "<footer>", "");
 
-                doc.ExportAsFixedFormat(fileName + ".pdf", WdExportFormat.wdExportFormatPDF, false, WdExportOptimizeFor.wdExportOptimizeForOnScreen,
+                doc.ExportAsFixedFormat(fileName.Replace(".docx","") + ".pdf", WdExportFormat.wdExportFormatPDF, false, WdExportOptimizeFor.wdExportOptimizeForOnScreen,
                     WdExportRange.wdExportAllDocument, 1, 1, WdExportItem.wdExportDocumentContent, true, true,
                     WdExportCreateBookmarks.wdExportCreateHeadingBookmarks, true, true, false, ref oMissing);
                 doc.Save();
@@ -130,16 +134,7 @@ namespace webuntis2BlaueBriefe
                 doc = null;
                 GC.Collect();
                 wordApp.Quit();
-            }
-            if (art == "M")
-            {
-                Global.WriteLine(folder, " => Mitteilung über den Leistungsstand");
-            }
-            else
-            {
-                Global.WriteLine(folder, "  => Gefährdung");
-
-            }
+            }            
         }
 
         private object GetAnredeLerncoaching()

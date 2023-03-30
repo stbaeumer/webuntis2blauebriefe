@@ -17,5 +17,12 @@ namespace webuntis2BlaueBriefe
             Plz = plz;
             Ort = ort;
         }
+
+        public Sorgeberechtigt(string plz, string strasse, string ort)
+        {
+            Plz = plz;
+            Strasse = strasse;
+            Ort = ort;
+        }
     }
 }
