@@ -53,10 +53,10 @@ namespace webuntis2BlaueBriefe
 
                     System.IO.Directory.CreateDirectory(Folder + @"\\" + klasse);
 
-                    //Global.WriteLine(Folder + "\\" + klasse, "===== Briefe " + DateTime.Now.Year + " (Stand: " + DateTime.Now.ToShortDateString() + ", " + DateTime.Now.ToShortTimeString() + ") =====");
-                    //Global.WriteLine(Folder + "\\" + klasse, "  ");
-                    //Global.WriteLine(Folder + "\\" + klasse, "==== " + klasse + " ====");
-                    //Global.WriteLine(Folder + "\\" + klasse, "  ");
+                    Global.WriteLine(Folder + "\\" + klasse, "==== " + klasse + " ====");
+                    Global.WriteLine(Folder + "\\" + klasse, "");
+                    Global.WriteLine(Folder + "\\" + klasse, "  Stand: " + DateTime.Now.ToShortDateString() + ", " + DateTime.Now.ToShortTimeString() + " Uhr");
+                    Global.WriteLine(Folder + "\\" + klasse, "");
 
                     Global.WriteLine(Folder + "\\" + klasse, @"^  Name  ^  Voll-\\ jährig  ^  Fächer & Noten \\ Halbjahr=>Jetzt  ^  Beschreibung  ^  Brief  ^");
 
