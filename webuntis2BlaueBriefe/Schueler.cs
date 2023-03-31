@@ -53,6 +53,8 @@ namespace webuntis2BlaueBriefe
 
             var sss = (from s in this.Sorgeberechtigte select s.Strasse).Distinct().ToList();
 
+            var z = (from s in this.Sorgeberechtigte select s).FirstOrDefault();
+            
             if (Volljaehrig)
             {
                 sss = new List<string>() { Strasse };
@@ -103,9 +105,9 @@ namespace webuntis2BlaueBriefe
 
                 if (!Volljaehrig)
                 {
-                    FindAndReplace(wordApp, doc, "<plz>", sorgeberechtigter.Plz);
-                    FindAndReplace(wordApp, doc, "<straße>", sorgeberechtigter.Strasse);
-                    FindAndReplace(wordApp, doc, "<ort>", sorgeberechtigter.Ort);
+                    FindAndReplace(wordApp, doc, "<plz>", sorgeberechtigter == null ? Plz : sorgeberechtigter.Plz);
+                    FindAndReplace(wordApp, doc, "<straße>", sorgeberechtigter == null ? Strasse : sorgeberechtigter.Strasse);
+                    FindAndReplace(wordApp, doc, "<ort>", sorgeberechtigter == null ? Ort : sorgeberechtigter.Ort);
                 }
                 else
                 {

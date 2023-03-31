@@ -237,7 +237,7 @@ namespace webuntis2BlaueBriefe
             if (x.Count != 1)
             {
                 Console.WriteLine("");
-                Console.WriteLine("Die Leistung aus Webuntis (" + webuntisLeistung.Klasse + ", " + webuntisLeistung.Fach + ") kann keiner Atlantisleistung zugeordnet werden.");
+                Console.WriteLine("Die Leistung aus Webuntis (" + webuntisLeistung.Name + ", " + webuntisLeistung.Klasse + ", " + webuntisLeistung.Fach + ") kann keiner Atlantisleistung zugeordnet werden.");
 
                 bool wiederholen = true;
 
