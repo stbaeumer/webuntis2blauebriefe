@@ -1,0 +1,9 @@
+\\fs01\Schulverwaltung\Neuer Ordner\webuntis2BlaueBriefe.exe.config
+\\fs01\Schulverwaltung\Neuer Ordner\webuntis2BlaueBriefe.exe
+\\fs01\Schulverwaltung\Neuer Ordner\webuntis2BlaueBriefe.pdb
+\\fs01\Schulverwaltung\webuntis2blauebriefe\webuntis2BlaueBriefe.exe.config
+\\fs01\Schulverwaltung\webuntis2blauebriefe\webuntis2BlaueBriefe.exe
+\\fs01\Schulverwaltung\webuntis2blauebriefe\webuntis2BlaueBriefe.pdb
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Release\webuntis2BlaueBriefe.exe
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Release\webuntis2BlaueBriefe.pdb
+U:\Source\Repos\webuntis2blauebriefe\webuntis2BlaueBriefe\obj\Release\webuntis2BlaueBriefe.csprojResolveAssemblyReference.cache
