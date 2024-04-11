@@ -1,0 +1,12 @@
+﻿################################################################################
+# Diese .gitignore-Datei wurde von Microsoft(R) Visual Studio automatisch erstellt.
+################################################################################
+
+/.vs
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
+/.vs/webuntis2blauebriefe
+/.vs/webuntis2blauebriefe/FileContentIndex
+/.vs/webuntis2blauebriefe/FileContentIndex/2875d715-05a6-485c-91e7-37b7ab75bdcb.vsidx
+/.vs/webuntis2blauebriefe/v17
+/.vs/webuntis2blauebriefe/v17/.wsuo
